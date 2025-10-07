@@ -164,6 +164,25 @@
             text-align: center;
             z-index: 1000;
             border: 3px solid #27ae60;
+            max-width: 400px;
+            width: 90%;
+        }
+        
+        .game-over {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(255, 255, 255, 0.95);
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.3);
+            text-align: center;
+            z-index: 1000;
+            border: 3px solid #e74c3c;
+            max-width: 400px;
+            width: 90%;
         }
         
         .congratulations h2 {
@@ -171,7 +190,12 @@
             margin-top: 0;
         }
         
-        .congratulations p {
+        .game-over h2 {
+            color: #e74c3c;
+            margin-top: 0;
+        }
+        
+        .congratulations p, .game-over p {
             font-size: 1.2em;
             margin-bottom: 20px;
         }
@@ -185,6 +209,13 @@
             height: 100%;
             background-color: rgba(0,0,0,0.5);
             z-index: 999;
+        }
+        
+        .stats {
+            background-color: #f8f9fa;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 15px 0;
         }
     </style>
 </head>
@@ -232,11 +263,29 @@
     </div>
     
     <div class="overlay" id="overlay"></div>
+    
+    <!-- Mensagem de Parabéns -->
     <div class="congratulations" id="congratulations">
         <h2>Parabéns!</h2>
         <p>Você encontrou todas as palavras antes do tempo acabar!</p>
         <p>O professor Rafael está orgulhoso de você!</p>
+        <div class="stats">
+            <p>Palavras encontradas: <span id="congrats-found">0</span>/<span id="congrats-total">0</span></p>
+            <p>Pontuação: <span id="congrats-score">0</span></p>
+        </div>
         <button id="continue-button">Continuar</button>
+    </div>
+    
+    <!-- Mensagem de Não Foi Dessa Vez -->
+    <div class="game-over" id="game-over">
+        <h2>Não foi dessa vez!</h2>
+        <p>O tempo acabou e você não conseguiu encontrar todas as palavras.</p>
+        <p>Perdeu para o Prof. Rafael!</p>
+        <div class="stats">
+            <p>Palavras encontradas: <span id="gameover-found">0</span>/<span id="gameover-total">0</span></p>
+            <p>Pontuação: <span id="gameover-score">0</span></p>
+        </div>
+        <button id="try-again-button">Tentar Novamente</button>
     </div>
 
     <script>
@@ -274,6 +323,7 @@
         let timerInterval;
         let changeTimer;
         let gameActive = true;
+        let timeLeft = WORD_CHANGE_INTERVAL / 1000;
 
         // Elementos do DOM
         const gridElement = document.getElementById('grid');
@@ -285,8 +335,18 @@
         const addStudentButton = document.getElementById('add-student');
         const resetGameButton = document.getElementById('reset-game');
         const congratulationsElement = document.getElementById('congratulations');
+        const gameOverElement = document.getElementById('game-over');
         const overlayElement = document.getElementById('overlay');
         const continueButton = document.getElementById('continue-button');
+        const tryAgainButton = document.getElementById('try-again-button');
+        
+        // Elementos de estatísticas
+        const congratsFoundElement = document.getElementById('congrats-found');
+        const congratsTotalElement = document.getElementById('congrats-total');
+        const congratsScoreElement = document.getElementById('congrats-score');
+        const gameoverFoundElement = document.getElementById('gameover-found');
+        const gameoverTotalElement = document.getElementById('gameover-total');
+        const gameoverScoreElement = document.getElementById('gameover-score');
 
         // Inicializar o jogo
         function initGame() {
@@ -296,6 +356,8 @@
             loadStudents();
             updateScoreboard();
             gameActive = true;
+            timeLeft = WORD_CHANGE_INTERVAL / 1000;
+            updateTimerDisplay();
         }
 
         // Criar o grid
@@ -438,24 +500,33 @@
             });
         }
 
+        // Atualizar display do timer
+        function updateTimerDisplay() {
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            timeElement.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+
         // Iniciar os temporizadores
         function startTimers() {
             // Timer para mudança de palavras
             clearInterval(changeTimer);
-            let timeLeft = WORD_CHANGE_INTERVAL / 1000; // em segundos
+            timeLeft = WORD_CHANGE_INTERVAL / 1000; // em segundos
+            updateTimerDisplay();
             
             changeTimer = setInterval(() => {
                 if (!gameActive) return;
                 
                 timeLeft--;
-                
-                const minutes = Math.floor(timeLeft / 60);
-                const seconds = timeLeft % 60;
-                timeElement.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                updateTimerDisplay();
                 
                 if (timeLeft <= 0) {
-                    selectNewWords();
-                    timeLeft = WORD_CHANGE_INTERVAL / 1000;
+                    // Tempo acabou - verificar se o jogador ganhou ou perdeu
+                    if (foundWords.length === currentWords.length) {
+                        showCongratulations();
+                    } else {
+                        showGameOver();
+                    }
                 }
             }, 1000);
         }
@@ -548,7 +619,28 @@
         // Mostrar mensagem de parabéns
         function showCongratulations() {
             gameActive = false;
+            clearInterval(changeTimer);
+            
+            // Atualizar estatísticas na mensagem
+            congratsFoundElement.textContent = foundWords.length;
+            congratsTotalElement.textContent = currentWords.length;
+            congratsScoreElement.textContent = students.length > 0 ? students[0].score : 0;
+            
             congratulationsElement.style.display = 'block';
+            overlayElement.style.display = 'block';
+        }
+
+        // Mostrar mensagem de não foi dessa vez
+        function showGameOver() {
+            gameActive = false;
+            clearInterval(changeTimer);
+            
+            // Atualizar estatísticas na mensagem
+            gameoverFoundElement.textContent = foundWords.length;
+            gameoverTotalElement.textContent = currentWords.length;
+            gameoverScoreElement.textContent = students.length > 0 ? students[0].score : 0;
+            
+            gameOverElement.style.display = 'block';
             overlayElement.style.display = 'block';
         }
 
@@ -558,6 +650,16 @@
             overlayElement.style.display = 'none';
             gameActive = true;
             selectNewWords();
+            startTimers();
+        });
+
+        // Tentar novamente após perder
+        tryAgainButton.addEventListener('click', () => {
+            gameOverElement.style.display = 'none';
+            overlayElement.style.display = 'none';
+            gameActive = true;
+            selectNewWords();
+            startTimers();
         });
 
         // Atualizar contador de palavras encontradas
@@ -634,9 +736,13 @@
                 saveStudents();
                 gameActive = true;
                 
-                // Esconder mensagem de parabéns se estiver visível
+                // Esconder mensagens se estiverem visíveis
                 congratulationsElement.style.display = 'none';
+                gameOverElement.style.display = 'none';
                 overlayElement.style.display = 'none';
+                
+                // Reiniciar timer
+                startTimers();
             }
         });
 
