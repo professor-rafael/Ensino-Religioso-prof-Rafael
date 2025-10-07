@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Caça-Palavras - Ensino Religioso</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        
+        .container {
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            position: relative;
+        }
+        
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+        
+        .game-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            padding: 10px;
+            background-color: #e8f4f8;
+            border-radius: 5px;
+        }
+        
+        .timer {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #e74c3c;
+        }
+        
+        .word-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: #f9f9f9;
+            border-radius: 5px;
+        }
+        
+        .word-item {
+            padding: 5px 10px;
+            background-color: #3498db;
+            color: white;
+            border-radius: 3px;
+            font-weight: bold;
+        }
+        
+        .word-item.found {
+            background-color: #27ae60;
+            text-decoration: line-through;
+        }
+        
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(15, 1fr);
+            gap: 2px;
+            margin-bottom: 20px;
+            border: 2px solid #2c3e50;
+            padding: 5px;
+            background-color: white;
+        }
+        
+        .cell {
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            background-color: #ecf0f1;
+            cursor: pointer;
+            user-select: none;
+        }
+        
+        .cell.selected {
+            background-color: #3498db;
+            color: white;
+        }
+        
+        .cell.found {
+            background-color: #27ae60;
+            color: white;
+        }
+        
+        .scoreboard {
+            margin-top: 20px;
+        }
+        
+        .scoreboard h2 {
+            color: #2c3e50;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 5px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        th {
+            background-color: #f2f2f2;
+        }
+        
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        button {
+            padding: 10px 20px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        
+        button:hover {
+            background-color: #2980b9;
+        }
+        
+        .instructions {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #fff9e6;
+            border-radius: 5px;
+            font-size: 0.9em;
+        }
+        
+        .congratulations {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(255, 255, 255, 0.95);
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.3);
+            text-align: center;
+            z-index: 1000;
+            border: 3px solid #27ae60;
+        }
+        
+        .congratulations h2 {
+            color: #27ae60;
+            margin-top: 0;
+        }
+        
+        .congratulations p {
+            font-size: 1.2em;
+            margin-bottom: 20px;
+        }
+        
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 999;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Caça-Palavras - Ensino Religioso</h1>
+        
+        <div class="game-info">
+            <div class="timer">Tempo até próxima troca: <span id="time">05:00</span></div>
+            <div>Palavras encontradas: <span id="found-count">0</span>/<span id="total-words">0</span></div>
+        </div>
+        
+        <div class="word-list" id="word-list">
+            <!-- As palavras serão inseridas aqui via JavaScript -->
+        </div>
+        
+        <div class="grid" id="grid">
+            <!-- O grid será gerado via JavaScript -->
+        </div>
+        
+        <div class="scoreboard">
+            <h2>Pontuação dos Alunos</h2>
+            <table id="score-table">
+                <thead>
+                    <tr>
+                        <th>Aluno</th>
+                        <th>Pontuação</th>
+                        <th>Palavras Encontradas</th>
+                    </tr>
+                </thead>
+                <tbody id="score-body">
+                    <!-- As pontuações serão inseridas aqui via JavaScript -->
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="controls">
+            <button id="add-student">Adicionar Aluno</button>
+            <button id="reset-game">Reiniciar Jogo</button>
+        </div>
+        
+        <div class="instructions">
+            <p><strong>Instruções:</strong> Clique e arraste para selecionar palavras no grid. As palavras podem estar na horizontal, vertical ou diagonal, em qualquer direção. A cada 5 minutos, as palavras mudam automaticamente.</p>
+        </div>
+    </div>
+    
+    <div class="overlay" id="overlay"></div>
+    <div class="congratulations" id="congratulations">
+        <h2>Parabéns!</h2>
+        <p>Você encontrou todas as palavras antes do tempo acabar!</p>
+        <p>O professor Rafael está orgulhoso de você!</p>
+        <button id="continue-button">Continuar</button>
+    </div>
+
+    <script>
+        // Listas de palavras por categoria
+        const wordCategories = {
+            personagens: [
+                "ABRAÃO", "MOISÉS", "DAVI", "SALOMÃO", "JÓ", "ISAÍAS", "JEREMIAS", 
+                "DANIEL", "JONAS", "MARIA", "JOSÉ", "PEDRO", "PAULO", "JOÃO"
+            ],
+            livros: [
+                "GÊNESIS", "ÊXODO", "LEVÍTICO", "NÚMEROS", "DEUTERONÔMIO", "JOSUÉ", 
+                "SALMOS", "PROVÉRBIOS", "ECLESIASTES", "CANTARES", "ISAÍAS", "MATEUS", 
+                "MARCOS", "LUCAS", "JOÃO", "ROMANOS", "CORÍNTIOS", "GÁLATAS", "EFÉSIOS"
+            ],
+            conceitos: [
+                "FÉ", "GRAÇA", "MISERICÓRDIA", "REDENÇÃO", "SALVAÇÃO", "ARREPENDIMENTO", 
+                "CONVERSÃO", "BATISMO", "COMUNHÃO", "ADORAÇÃO", "ORAÇÃO", "JEJUM", 
+                "CARIDADE", "PERDÃO", "HUMILDADE", "SANTIDADE", "JUSTIÇA", "AMOR", "PAZ"
+            ],
+            eventos: [
+                "CRIAÇÃO", "DILÚVIO", "ÊXODO", "CONQUISTA", "EXÍLIO", "ENCARNAÇÃO", 
+                "NATIVIDADE", "BATISMO", "TRANSFIGURAÇÃO", "PÁSCOA", "PENTECOSTES", 
+                "ASCENSÃO", "RESSURREIÇÃO", "PAROUSIA"
+            ]
+        };
+
+        // Configurações do jogo
+        const GRID_SIZE = 15;
+        const WORD_CHANGE_INTERVAL = 5 * 60 * 1000; // 5 minutos em milissegundos
+        let currentWords = [];
+        let selectedCells = [];
+        let foundWords = [];
+        let students = [];
+        let currentCategory = '';
+        let timerInterval;
+        let changeTimer;
+        let gameActive = true;
+
+        // Elementos do DOM
+        const gridElement = document.getElementById('grid');
+        const wordListElement = document.getElementById('word-list');
+        const timeElement = document.getElementById('time');
+        const foundCountElement = document.getElementById('found-count');
+        const totalWordsElement = document.getElementById('total-words');
+        const scoreBodyElement = document.getElementById('score-body');
+        const addStudentButton = document.getElementById('add-student');
+        const resetGameButton = document.getElementById('reset-game');
+        const congratulationsElement = document.getElementById('congratulations');
+        const overlayElement = document.getElementById('overlay');
+        const continueButton = document.getElementById('continue-button');
+
+        // Inicializar o jogo
+        function initGame() {
+            createGrid();
+            selectNewWords();
+            startTimers();
+            loadStudents();
+            updateScoreboard();
+            gameActive = true;
+        }
+
+        // Criar o grid
+        function createGrid() {
+            gridElement.innerHTML = '';
+            for (let i = 0; i < GRID_SIZE; i++) {
+                for (let j = 0; j < GRID_SIZE; j++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'cell';
+                    cell.dataset.row = i;
+                    cell.dataset.col = j;
+                    
+                    // Eventos de seleção
+                    cell.addEventListener('mousedown', startSelection);
+                    cell.addEventListener('mouseenter', continueSelection);
+                    cell.addEventListener('mouseup', endSelection);
+                    
+                    gridElement.appendChild(cell);
+                }
+            }
+        }
+
+        // Selecionar novas palavras
+        function selectNewWords() {
+            // Escolher uma categoria aleatória
+            const categories = Object.keys(wordCategories);
+            currentCategory = categories[Math.floor(Math.random() * categories.length)];
+            
+            // Selecionar palavras aleatórias da categoria
+            const availableWords = [...wordCategories[currentCategory]];
+            currentWords = [];
+            
+            // Limpar palavras encontradas
+            foundWords = [];
+            updateFoundCount();
+            
+            // Escolher 8-10 palavras
+            const numWords = Math.min(8 + Math.floor(Math.random() * 3), availableWords.length);
+            for (let i = 0; i < numWords; i++) {
+                const randomIndex = Math.floor(Math.random() * availableWords.length);
+                currentWords.push(availableWords[randomIndex]);
+                availableWords.splice(randomIndex, 1);
+            }
+            
+            // Atualizar a lista de palavras
+            updateWordList();
+            
+            // Preencher o grid com as novas palavras
+            fillGridWithWords();
+        }
+
+        // Preencher o grid com palavras
+        function fillGridWithWords() {
+            // Limpar o grid
+            const cells = document.querySelectorAll('.cell');
+            cells.forEach(cell => {
+                cell.textContent = '';
+                cell.classList.remove('found');
+            });
+            
+            // Para cada palavra, tentar colocá-la no grid
+            for (const word of currentWords) {
+                let placed = false;
+                let attempts = 0;
+                
+                while (!placed && attempts < 100) {
+                    attempts++;
+                    
+                    // Escolher direção aleatória
+                    const directions = [
+                        { dr: 0, dc: 1 },   // Horizontal
+                        { dr: 1, dc: 0 },   // Vertical
+                        { dr: 1, dc: 1 },   // Diagonal direita
+                        { dr: 1, dc: -1 }   // Diagonal esquerda
+                    ];
+                    
+                    const direction = directions[Math.floor(Math.random() * directions.length)];
+                    
+                    // Escolher posição inicial
+                    const startRow = Math.floor(Math.random() * GRID_SIZE);
+                    const startCol = Math.floor(Math.random() * GRID_SIZE);
+                    
+                    // Verificar se a palavra cabe
+                    const endRow = startRow + direction.dr * (word.length - 1);
+                    const endCol = startCol + direction.dc * (word.length - 1);
+                    
+                    if (endRow < 0 || endRow >= GRID_SIZE || endCol < 0 || endCol >= GRID_SIZE) {
+                        continue;
+                    }
+                    
+                    // Verificar se não há conflito com outras palavras
+                    let conflict = false;
+                    for (let i = 0; i < word.length; i++) {
+                        const row = startRow + i * direction.dr;
+                        const col = startCol + i * direction.dc;
+                        const cell = document.querySelector(`.cell[data-row="${row}"][data-col="${col}"]`);
+                        
+                        if (cell.textContent && cell.textContent !== word[i]) {
+                            conflict = true;
+                            break;
+                        }
+                    }
+                    
+                    if (conflict) {
+                        continue;
+                    }
+                    
+                    // Colocar a palavra no grid
+                    for (let i = 0; i < word.length; i++) {
+                        const row = startRow + i * direction.dr;
+                        const col = startCol + i * direction.dc;
+                        const cell = document.querySelector(`.cell[data-row="${row}"][data-col="${col}"]`);
+                        cell.textContent = word[i];
+                    }
+                    
+                    placed = true;
+                }
+            }
+            
+            // Preencher células vazias com letras aleatórias
+            const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+            cells.forEach(cell => {
+                if (!cell.textContent) {
+                    cell.textContent = letters[Math.floor(Math.random() * letters.length)];
+                }
+            });
+        }
+
+        // Atualizar a lista de palavras
+        function updateWordList() {
+            wordListElement.innerHTML = '';
+            totalWordsElement.textContent = currentWords.length;
+            
+            currentWords.forEach(word => {
+                const wordElement = document.createElement('div');
+                wordElement.className = 'word-item';
+                wordElement.textContent = word;
+                wordElement.dataset.word = word;
+                wordListElement.appendChild(wordElement);
+            });
+        }
+
+        // Iniciar os temporizadores
+        function startTimers() {
+            // Timer para mudança de palavras
+            clearInterval(changeTimer);
+            let timeLeft = WORD_CHANGE_INTERVAL / 1000; // em segundos
+            
+            changeTimer = setInterval(() => {
+                if (!gameActive) return;
+                
+                timeLeft--;
+                
+                const minutes = Math.floor(timeLeft / 60);
+                const seconds = timeLeft % 60;
+                timeElement.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                
+                if (timeLeft <= 0) {
+                    selectNewWords();
+                    timeLeft = WORD_CHANGE_INTERVAL / 1000;
+                }
+            }, 1000);
+        }
+
+        // Sistema de seleção de palavras
+        let isSelecting = false;
+
+        function startSelection(e) {
+            if (!gameActive) return;
+            isSelecting = true;
+            selectedCells = [this];
+            this.classList.add('selected');
+        }
+
+        function continueSelection(e) {
+            if (!isSelecting || !gameActive) return;
+            
+            const cell = e.target;
+            if (!selectedCells.includes(cell)) {
+                selectedCells.push(cell);
+                cell.classList.add('selected');
+            }
+        }
+
+        function endSelection(e) {
+            if (!isSelecting || !gameActive) return;
+            isSelecting = false;
+            
+            // Verificar se a seleção forma uma palavra
+            checkSelection();
+            
+            // Limpar seleção
+            selectedCells.forEach(cell => {
+                cell.classList.remove('selected');
+            });
+            selectedCells = [];
+        }
+
+        // Verificar se a seleção corresponde a uma palavra
+        function checkSelection() {
+            if (selectedCells.length < 3) return;
+            
+            // Obter a palavra formada pela seleção
+            const selectedWord = selectedCells.map(cell => cell.textContent).join('');
+            
+            // Verificar se a palavra está na lista (em qualquer direção)
+            const reversedWord = selectedWord.split('').reverse().join('');
+            
+            let foundWord = null;
+            for (const word of currentWords) {
+                if (word === selectedWord || word === reversedWord) {
+                    foundWord = word;
+                    break;
+                }
+            }
+            
+            if (foundWord && !foundWords.includes(foundWord)) {
+                // Marcar palavra como encontrada
+                foundWords.push(foundWord);
+                
+                // Marcar células como encontradas
+                selectedCells.forEach(cell => {
+                    cell.classList.add('found');
+                });
+                
+                // Atualizar lista de palavras
+                const wordElement = document.querySelector(`.word-item[data-word="${foundWord}"]`);
+                if (wordElement) {
+                    wordElement.classList.add('found');
+                }
+                
+                // Atualizar contador
+                updateFoundCount();
+                
+                // Atualizar pontuação (para o primeiro aluno por enquanto)
+                if (students.length > 0) {
+                    students[0].score += foundWord.length * 10;
+                    students[0].wordsFound++;
+                    updateScoreboard();
+                    saveStudents();
+                    
+                    // Verificar se todas as palavras foram encontradas
+                    if (foundWords.length === currentWords.length) {
+                        showCongratulations();
+                    }
+                }
+            }
+        }
+
+        // Mostrar mensagem de parabéns
+        function showCongratulations() {
+            gameActive = false;
+            congratulationsElement.style.display = 'block';
+            overlayElement.style.display = 'block';
+        }
+
+        // Continuar jogo após parabéns
+        continueButton.addEventListener('click', () => {
+            congratulationsElement.style.display = 'none';
+            overlayElement.style.display = 'none';
+            gameActive = true;
+            selectNewWords();
+        });
+
+        // Atualizar contador de palavras encontradas
+        function updateFoundCount() {
+            foundCountElement.textContent = foundWords.length;
+        }
+
+        // Sistema de pontuação dos alunos
+        function loadStudents() {
+            const savedStudents = localStorage.getItem('religiousWordSearchStudents');
+            if (savedStudents) {
+                students = JSON.parse(savedStudents);
+            } else {
+                // Alunos padrão para demonstração
+                students = [
+                    { name: "Ana", score: 0, wordsFound: 0 },
+                    { name: "Bruno", score: 0, wordsFound: 0 },
+                    { name: "Carla", score: 0, wordsFound: 0 }
+                ];
+                saveStudents();
+            }
+        }
+
+        function saveStudents() {
+            localStorage.setItem('religiousWordSearchStudents', JSON.stringify(students));
+        }
+
+        function updateScoreboard() {
+            scoreBodyElement.innerHTML = '';
+            
+            students.forEach(student => {
+                const row = document.createElement('tr');
+                
+                const nameCell = document.createElement('td');
+                nameCell.textContent = student.name;
+                
+                const scoreCell = document.createElement('td');
+                scoreCell.textContent = student.score;
+                
+                const wordsCell = document.createElement('td');
+                wordsCell.textContent = student.wordsFound;
+                
+                row.appendChild(nameCell);
+                row.appendChild(scoreCell);
+                row.appendChild(wordsCell);
+                
+                scoreBodyElement.appendChild(row);
+            });
+        }
+
+        // Adicionar novo aluno
+        addStudentButton.addEventListener('click', () => {
+            const name = prompt("Digite o nome do aluno:");
+            if (name) {
+                students.push({
+                    name: name,
+                    score: 0,
+                    wordsFound: 0
+                });
+                updateScoreboard();
+                saveStudents();
+            }
+        });
+
+        // Reiniciar o jogo
+        resetGameButton.addEventListener('click', () => {
+            if (confirm("Tem certeza que deseja reiniciar o jogo? Todas as pontuações serão zeradas.")) {
+                students.forEach(student => {
+                    student.score = 0;
+                    student.wordsFound = 0;
+                });
+                selectNewWords();
+                updateScoreboard();
+                saveStudents();
+                gameActive = true;
+                
+                // Esconder mensagem de parabéns se estiver visível
+                congratulationsElement.style.display = 'none';
+                overlayElement.style.display = 'none';
+            }
+        });
+
+        // Inicializar o jogo quando a página carregar
+        window.addEventListener('load', initGame);
+    </script>
+</body>
+</html>
