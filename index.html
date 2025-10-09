@@ -5,41 +5,58 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Caça-Palavras - Ensino Religioso</title>
     <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Comic Sans MS', 'Segoe UI', Tahoma, sans-serif;
             max-width: 1000px;
             margin: 0 auto;
             padding: 20px;
-            background-color: #f5f5f5;
+            background-color: #f0f8ff;
+            background-image: linear-gradient(to bottom, #e6f7ff, #f0f8ff);
         }
         
         .container {
             background-color: white;
-            border-radius: 10px;
+            border-radius: 15px;
             padding: 20px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-            position: relative;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            border: 3px solid #4a90e2;
+            display: none; /* Inicialmente escondido */
         }
         
         h1 {
             color: #2c3e50;
             text-align: center;
             margin-bottom: 10px;
+            font-size: 2.2em;
+            background: linear-gradient(to right, #4a90e2, #2c3e50);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
         
         .game-info {
             display: flex;
             justify-content: space-between;
             margin-bottom: 20px;
-            padding: 10px;
+            padding: 15px;
             background-color: #e8f4f8;
-            border-radius: 5px;
+            border-radius: 10px;
+            border: 2px dashed #4a90e2;
         }
         
         .timer {
-            font-size: 1.2em;
+            font-size: 1.4em;
             font-weight: bold;
             color: #e74c3c;
+            background-color: #fff;
+            padding: 8px 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
         
         .word-list {
@@ -49,15 +66,18 @@
             margin-bottom: 20px;
             padding: 15px;
             background-color: #f9f9f9;
-            border-radius: 5px;
+            border-radius: 10px;
+            border: 2px solid #4a90e2;
+            justify-content: center;
         }
         
         .word-item {
-            padding: 5px 10px;
+            padding: 8px 15px;
             background-color: #3498db;
             color: white;
-            border-radius: 3px;
+            border-radius: 20px;
             font-weight: bold;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
         }
         
         .word-item.found {
@@ -70,9 +90,11 @@
             grid-template-columns: repeat(15, 1fr);
             gap: 2px;
             margin-bottom: 20px;
-            border: 2px solid #2c3e50;
-            padding: 5px;
+            border: 3px solid #2c3e50;
+            padding: 10px;
             background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
         }
         
         .cell {
@@ -85,6 +107,7 @@
             background-color: #ecf0f1;
             cursor: pointer;
             user-select: none;
+            border-radius: 4px;
         }
         
         .cell.selected {
@@ -99,12 +122,17 @@
         
         .scoreboard {
             margin-top: 20px;
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            border: 2px solid #4a90e2;
         }
         
         .scoreboard h2 {
             color: #2c3e50;
-            border-bottom: 1px solid #ddd;
-            padding-bottom: 5px;
+            border-bottom: 2px solid #4a90e2;
+            padding-bottom: 8px;
+            text-align: center;
         }
         
         table {
@@ -113,30 +141,39 @@
         }
         
         th, td {
-            padding: 10px;
+            padding: 12px;
             text-align: left;
             border-bottom: 1px solid #ddd;
         }
         
         th {
-            background-color: #f2f2f2;
+            background-color: #4a90e2;
+            color: white;
+        }
+        
+        .current-player {
+            background-color: #e1f5fe !important;
+            font-weight: bold;
         }
         
         .controls {
             display: flex;
             justify-content: center;
-            gap: 10px;
+            gap: 15px;
             margin-top: 20px;
         }
         
         button {
-            padding: 10px 20px;
+            padding: 12px 25px;
             background-color: #3498db;
             color: white;
             border: none;
-            border-radius: 5px;
+            border-radius: 8px;
             cursor: pointer;
             font-weight: bold;
+            font-size: 1em;
+            transition: all 0.3s;
+            box-shadow: 0 3px 5px rgba(0,0,0,0.2);
         }
         
         button:hover {
@@ -147,57 +184,45 @@
             margin-top: 20px;
             padding: 15px;
             background-color: #fff9e6;
-            border-radius: 5px;
+            border-radius: 10px;
             font-size: 0.9em;
+            border: 2px dashed #f39c12;
+        }
+        
+        .congratulations, .game-over {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 0 25px rgba(0,0,0,0.3);
+            text-align: center;
+            z-index: 1000;
+            max-width: 450px;
+            width: 90%;
         }
         
         .congratulations {
-            display: none;
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background-color: rgba(255, 255, 255, 0.95);
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 0 20px rgba(0,0,0,0.3);
-            text-align: center;
-            z-index: 1000;
-            border: 3px solid #27ae60;
-            max-width: 400px;
-            width: 90%;
+            border: 4px solid #27ae60;
         }
         
         .game-over {
-            display: none;
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background-color: rgba(255, 255, 255, 0.95);
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 0 20px rgba(0,0,0,0.3);
-            text-align: center;
-            z-index: 1000;
-            border: 3px solid #e74c3c;
-            max-width: 400px;
-            width: 90%;
+            border: 4px solid #e74c3c;
         }
         
         .congratulations h2 {
             color: #27ae60;
             margin-top: 0;
+            font-size: 2em;
         }
         
         .game-over h2 {
             color: #e74c3c;
             margin-top: 0;
-        }
-        
-        .congratulations p, .game-over p {
-            font-size: 1.2em;
-            margin-bottom: 20px;
+            font-size: 2em;
         }
         
         .overlay {
@@ -213,52 +238,190 @@
         
         .stats {
             background-color: #f8f9fa;
-            padding: 10px;
-            border-radius: 5px;
+            padding: 15px;
+            border-radius: 8px;
             margin: 15px 0;
+            border: 1px solid #ddd;
+        }
+        
+        .time-config {
+            margin-bottom: 15px;
+            padding: 12px;
+            background-color: #f0f7ff;
+            border-radius: 8px;
+            text-align: center;
+            border: 2px dashed #4a90e2;
+        }
+        
+        .time-config label {
+            margin-right: 10px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        
+        .time-config input {
+            width: 50px;
+            padding: 8px;
+            border: 2px solid #4a90e2;
+            border-radius: 5px;
+            text-align: center;
+            font-weight: bold;
+        }
+        
+        .category-info {
+            text-align: center;
+            margin-bottom: 10px;
+            font-style: italic;
+            color: #7f8c8d;
+            font-size: 1.1em;
+            background-color: #e8f4f8;
+            padding: 8px;
+            border-radius: 8px;
+            border: 1px solid #4a90e2;
+        }
+        
+        .progress-bar {
+            height: 10px;
+            background-color: #ecf0f1;
+            border-radius: 5px;
+            margin: 10px 0;
+            overflow: hidden;
+        }
+        
+        .progress {
+            height: 100%;
+            background-color: #27ae60;
+            width: 0%;
+        }
+        
+        .time-warning {
+            color: #e74c3c;
+            font-weight: bold;
+        }
+        
+        .player-setup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 0 25px rgba(0,0,0,0.3);
+            text-align: center;
+            z-index: 1001;
+            border: 4px solid #4a90e2;
+            max-width: 400px;
+            width: 90%;
+        }
+        
+        .player-setup h2 {
+            color: #2c3e50;
+            margin-top: 0;
+            margin-bottom: 20px;
+        }
+        
+        .player-setup input {
+            width: 100%;
+            padding: 12px;
+            margin: 15px 0;
+            border: 2px solid #4a90e2;
+            border-radius: 8px;
+            font-size: 1.1em;
+            text-align: center;
+        }
+        
+        .ranking-medal {
+            display: inline-block;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 24px;
+            margin-right: 10px;
+            font-weight: bold;
+            color: white;
+        }
+        
+        .gold {
+            background-color: #ffd700;
+        }
+        
+        .silver {
+            background-color: #c0c0c0;
+        }
+        
+        .bronze {
+            background-color: #cd7f32;
         }
     </style>
 </head>
 <body>
-    <div class="container">
+    <!-- Tela de configuração do jogador (SEMPRE VISÍVEL NO INÍCIO) -->
+    <div class="player-setup" id="player-setup">
+        <h2>Bem-vindo ao Caça-Palavras!</h2>
+        <p>Digite seu nome para começar:</p>
+        <input type="text" id="player-name" placeholder="Seu nome" maxlength="20">
+        <button id="start-game">Começar Jogo</button>
+    </div>
+
+    <!-- Container do jogo (INICIALMENTE ESCONDIDO) -->
+    <div class="container" id="game-container">
         <h1>Caça-Palavras - Ensino Religioso</h1>
         
+        <div class="time-config">
+            <label for="time-input">Tempo (1-3 minutos):</label>
+            <input type="number" id="time-input" min="1" max="3" value="3">
+            <button id="set-time">Definir Tempo</button>
+        </div>
+        
         <div class="game-info">
-            <div class="timer">Tempo até próxima troca: <span id="time">05:00</span></div>
-            <div>Palavras encontradas: <span id="found-count">0</span>/<span id="total-words">0</span></div>
+            <div class="timer">Tempo: <span id="time">03:00</span></div>
+            <div>Palavras: <span id="found-count">0</span>/<span id="total-words">0</span></div>
+            <div>Jogador: <span id="current-player">-</span></div>
+        </div>
+        
+        <div class="progress-bar">
+            <div class="progress" id="progress-bar"></div>
+        </div>
+        
+        <div class="category-info" id="category-info">
+            <!-- Categoria será inserida aqui -->
         </div>
         
         <div class="word-list" id="word-list">
-            <!-- As palavras serão inseridas aqui via JavaScript -->
+            <!-- Palavras serão inseridas aqui -->
         </div>
         
         <div class="grid" id="grid">
-            <!-- O grid será gerado via JavaScript -->
+            <!-- Grid será gerado aqui -->
         </div>
         
         <div class="scoreboard">
-            <h2>Pontuação dos Alunos</h2>
+            <h2>Classificação</h2>
             <table id="score-table">
                 <thead>
                     <tr>
+                        <th>Posição</th>
                         <th>Aluno</th>
                         <th>Pontuação</th>
-                        <th>Palavras Encontradas</th>
+                        <th>Palavras</th>
+                        <th>Tempo Restante</th>
                     </tr>
                 </thead>
                 <tbody id="score-body">
-                    <!-- As pontuações serão inseridas aqui via JavaScript -->
+                    <!-- Pontuações serão inseridas aqui -->
                 </tbody>
             </table>
         </div>
         
         <div class="controls">
-            <button id="add-student">Adicionar Aluno</button>
+            <button id="new-player">Novo Jogador</button>
             <button id="reset-game">Reiniciar Jogo</button>
         </div>
         
         <div class="instructions">
-            <p><strong>Instruções:</strong> Clique e arraste para selecionar palavras no grid. As palavras podem estar na horizontal, vertical ou diagonal, em qualquer direção. A cada 5 minutos, as palavras mudam automaticamente.</p>
+            <p><strong>Instruções:</strong> Clique e arraste para selecionar palavras no grid. Você tem até 3 minutos!</p>
         </div>
     </div>
     
@@ -266,101 +429,167 @@
     
     <!-- Mensagem de Parabéns -->
     <div class="congratulations" id="congratulations">
-        <h2>Parabéns!</h2>
-        <p>Você encontrou todas as palavras antes do tempo acabar!</p>
-        <p>O professor Rafael está orgulhoso de você!</p>
+        <h2>Parabéns, <span id="congrats-player"></span>!</h2>
+        <p>Você encontrou todas as palavras!</p>
+        <p>Posição: <span id="player-position"></span>º</p>
         <div class="stats">
-            <p>Palavras encontradas: <span id="congrats-found">0</span>/<span id="congrats-total">0</span></p>
+            <p>Palavras: <span id="congrats-found">0</span>/<span id="congrats-total">0</span></p>
             <p>Pontuação: <span id="congrats-score">0</span></p>
+            <p>Tempo: <span id="congrats-time">0</span></p>
         </div>
-        <button id="continue-button">Continuar</button>
+        <button id="continue-button">Jogar Novamente</button>
     </div>
     
-    <!-- Mensagem de Não Foi Dessa Vez -->
+    <!-- Mensagem de Fim de Jogo -->
     <div class="game-over" id="game-over">
-        <h2>Não foi dessa vez!</h2>
-        <p>O tempo acabou e você não conseguiu encontrar todas as palavras.</p>
-        <p>Perdeu para o Prof. Rafael!</p>
+        <h2>Tempo esgotado, <span id="gameover-player"></span>!</h2>
+        <p>Você não conseguiu encontrar todas as palavras.</p>
         <div class="stats">
-            <p>Palavras encontradas: <span id="gameover-found">0</span>/<span id="gameover-total">0</span></p>
+            <p>Palavras: <span id="gameover-found">0</span>/<span id="gameover-total">0</span></p>
             <p>Pontuação: <span id="gameover-score">0</span></p>
         </div>
         <button id="try-again-button">Tentar Novamente</button>
     </div>
 
     <script>
-        // Listas de palavras por categoria
-        const wordCategories = {
-            personagens: [
-                "ABRAÃO", "MOISÉS", "DAVI", "SALOMÃO", "JÓ", "ISAÍAS", "JEREMIAS", 
-                "DANIEL", "JONAS", "MARIA", "JOSÉ", "PEDRO", "PAULO", "JOÃO"
-            ],
-            livros: [
-                "GÊNESIS", "ÊXODO", "LEVÍTICO", "NÚMEROS", "DEUTERONÔMIO", "JOSUÉ", 
-                "SALMOS", "PROVÉRBIOS", "ECLESIASTES", "CANTARES", "ISAÍAS", "MATEUS", 
-                "MARCOS", "LUCAS", "JOÃO", "ROMANOS", "CORÍNTIOS", "GÁLATAS", "EFÉSIOS"
-            ],
-            conceitos: [
-                "FÉ", "GRAÇA", "MISERICÓRDIA", "REDENÇÃO", "SALVAÇÃO", "ARREPENDIMENTO", 
-                "CONVERSÃO", "BATISMO", "COMUNHÃO", "ADORAÇÃO", "ORAÇÃO", "JEJUM", 
-                "CARIDADE", "PERDÃO", "HUMILDADE", "SANTIDADE", "JUSTIÇA", "AMOR", "PAZ"
-            ],
-            eventos: [
-                "CRIAÇÃO", "DILÚVIO", "ÊXODO", "CONQUISTA", "EXÍLIO", "ENCARNAÇÃO", 
-                "NATIVIDADE", "BATISMO", "TRANSFIGURAÇÃO", "PÁSCOA", "PENTECOSTES", 
-                "ASCENSÃO", "RESSURREIÇÃO", "PAROUSIA"
-            ]
-        };
-
-        // Configurações do jogo
+        // ========== CONFIGURAÇÕES E VARIÁVEIS GLOBAIS ==========
         const GRID_SIZE = 15;
-        const WORD_CHANGE_INTERVAL = 5 * 60 * 1000; // 5 minutos em milissegundos
+        let WORD_CHANGE_INTERVAL = 3 * 60 * 1000; // 3 minutos
         let currentWords = [];
         let selectedCells = [];
         let foundWords = [];
         let students = [];
         let currentCategory = '';
-        let timerInterval;
         let changeTimer;
-        let gameActive = true;
+        let gameActive = false;
         let timeLeft = WORD_CHANGE_INTERVAL / 1000;
+        let totalTime = WORD_CHANGE_INTERVAL / 1000;
+        let currentPlayer = null;
 
-        // Elementos do DOM
+        // ========== ELEMENTOS DO DOM ==========
+        const playerSetupElement = document.getElementById('player-setup');
+        const gameContainerElement = document.getElementById('game-container');
+        const playerNameInput = document.getElementById('player-name');
+        const startGameButton = document.getElementById('start-game');
+        const currentPlayerElement = document.getElementById('current-player');
         const gridElement = document.getElementById('grid');
         const wordListElement = document.getElementById('word-list');
         const timeElement = document.getElementById('time');
         const foundCountElement = document.getElementById('found-count');
         const totalWordsElement = document.getElementById('total-words');
         const scoreBodyElement = document.getElementById('score-body');
-        const addStudentButton = document.getElementById('add-student');
+        const newPlayerButton = document.getElementById('new-player');
         const resetGameButton = document.getElementById('reset-game');
         const congratulationsElement = document.getElementById('congratulations');
         const gameOverElement = document.getElementById('game-over');
         const overlayElement = document.getElementById('overlay');
         const continueButton = document.getElementById('continue-button');
         const tryAgainButton = document.getElementById('try-again-button');
-        
-        // Elementos de estatísticas
+        const timeInput = document.getElementById('time-input');
+        const setTimeButton = document.getElementById('set-time');
+        const categoryInfoElement = document.getElementById('category-info');
+        const progressBarElement = document.getElementById('progress-bar');
+        const congratsPlayerElement = document.getElementById('congrats-player');
+        const gameoverPlayerElement = document.getElementById('gameover-player');
+        const playerPositionElement = document.getElementById('player-position');
         const congratsFoundElement = document.getElementById('congrats-found');
         const congratsTotalElement = document.getElementById('congrats-total');
         const congratsScoreElement = document.getElementById('congrats-score');
+        const congratsTimeElement = document.getElementById('congrats-time');
         const gameoverFoundElement = document.getElementById('gameover-found');
         const gameoverTotalElement = document.getElementById('gameover-total');
         const gameoverScoreElement = document.getElementById('gameover-score');
 
-        // Inicializar o jogo
-        function initGame() {
+        // ========== LISTA DE PALAVRAS ==========
+        const wordCategories = {
+            personagens: ["ABRAO", "MOISES", "DAVI", "SALOMAO", "JO", "ISAIAS", "JEREMIAS", 
+                         "DANIEL", "JONAS", "MARIA", "JOSE", "PEDRO", "PAULO", "JOAO"],
+            livros: ["GENESIS", "EXODO", "LEVITICO", "NUMEROS", "DEUTERONOMIO", "JOSUE", 
+                    "SALMOS", "PROVERBIOS", "ECLESIASTES", "CANTARES", "ISAIAS", "MATEUS", 
+                    "MARCOS", "LUCAS", "JOAO", "ROMANOS", "CORINTIOS", "GALATAS", "EFESIOS"],
+            conceitos: ["FE", "GRAÇA", "MISERICORDIA", "REDENCAO", "SALVACAO", "ARREPENDIMENTO", 
+                       "CONVERSAO", "BATISMO", "COMUNHAO", "ADORACAO", "ORACAO", "JEJUM", 
+                       "CARIDADE", "PERDAO", "HUMILDADE", "SANTIDADE", "JUSTICA", "AMOR", "PAZ"],
+            eventos: ["CRIACAO", "DILUVIO", "EXODO", "CONQUISTA", "EXILIO", "ENCARNACAO", 
+                     "NATIVIDADE", "BATISMO", "TRANSFIGURACAO", "PASCOA", "PENTECOSTES", 
+                     "ASCENSAO", "RESSURRICAO", "PAROUSIA"]
+        };
+
+        // ========== INICIALIZAÇÃO DO JOGO ==========
+        function initializeGame() {
             createGrid();
             selectNewWords();
-            startTimers();
             loadStudents();
             updateScoreboard();
-            gameActive = true;
-            timeLeft = WORD_CHANGE_INTERVAL / 1000;
-            updateTimerDisplay();
+            
+            // Event listeners
+            startGameButton.addEventListener('click', startGame);
+            newPlayerButton.addEventListener('click', showPlayerSetup);
+            resetGameButton.addEventListener('click', resetGame);
+            continueButton.addEventListener('click', continueGame);
+            tryAgainButton.addEventListener('click', tryAgain);
+            setTimeButton.addEventListener('click', setCustomTime);
+            
+            // Permitir Enter no campo de nome
+            playerNameInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    startGame();
+                }
+            });
+            
+            // Focar no campo de nome
+            playerNameInput.focus();
         }
 
-        // Criar o grid
+        // ========== FUNÇÕES DO JOGO ==========
+        
+        function startGame() {
+            const playerName = playerNameInput.value.trim();
+            if (!playerName) {
+                alert('Por favor, digite seu nome!');
+                playerNameInput.focus();
+                return;
+            }
+            
+            currentPlayer = playerName;
+            currentPlayerElement.textContent = currentPlayer;
+            
+            // Esconder tela de setup e mostrar jogo
+            playerSetupElement.style.display = 'none';
+            gameContainerElement.style.display = 'block';
+            
+            // Adicionar jogador se não existir
+            if (!students.find(s => s.name === currentPlayer)) {
+                students.push({
+                    name: currentPlayer,
+                    score: 0,
+                    wordsFound: 0,
+                    timeLeft: 0
+                });
+            }
+            
+            // Reiniciar estatísticas do jogador
+            resetCurrentPlayerStats();
+            
+            // Iniciar jogo
+            gameActive = true;
+            startTimers();
+        }
+
+        function showPlayerSetup() {
+            gameActive = false;
+            clearInterval(changeTimer);
+            
+            playerSetupElement.style.display = 'block';
+            gameContainerElement.style.display = 'none';
+            congratulationsElement.style.display = 'none';
+            gameOverElement.style.display = 'none';
+            overlayElement.style.display = 'none';
+            
+            playerNameInput.value = '';
+            playerNameInput.focus();
+        }
+
         function createGrid() {
             gridElement.innerHTML = '';
             for (let i = 0; i < GRID_SIZE; i++) {
@@ -370,7 +599,6 @@
                     cell.dataset.row = i;
                     cell.dataset.col = j;
                     
-                    // Eventos de seleção
                     cell.addEventListener('mousedown', startSelection);
                     cell.addEventListener('mouseenter', continueSelection);
                     cell.addEventListener('mouseup', endSelection);
@@ -380,21 +608,15 @@
             }
         }
 
-        // Selecionar novas palavras
         function selectNewWords() {
-            // Escolher uma categoria aleatória
             const categories = Object.keys(wordCategories);
             currentCategory = categories[Math.floor(Math.random() * categories.length)];
+            categoryInfoElement.textContent = `Categoria: ${currentCategory.charAt(0).toUpperCase() + currentCategory.slice(1)}`;
             
-            // Selecionar palavras aleatórias da categoria
             const availableWords = [...wordCategories[currentCategory]];
             currentWords = [];
-            
-            // Limpar palavras encontradas
             foundWords = [];
-            updateFoundCount();
             
-            // Escolher 8-10 palavras
             const numWords = Math.min(8 + Math.floor(Math.random() * 3), availableWords.length);
             for (let i = 0; i < numWords; i++) {
                 const randomIndex = Math.floor(Math.random() * availableWords.length);
@@ -402,45 +624,32 @@
                 availableWords.splice(randomIndex, 1);
             }
             
-            // Atualizar a lista de palavras
             updateWordList();
-            
-            // Preencher o grid com as novas palavras
             fillGridWithWords();
+            updateFoundCount();
         }
 
-        // Preencher o grid com palavras
         function fillGridWithWords() {
-            // Limpar o grid
             const cells = document.querySelectorAll('.cell');
             cells.forEach(cell => {
                 cell.textContent = '';
                 cell.classList.remove('found');
             });
             
-            // Para cada palavra, tentar colocá-la no grid
             for (const word of currentWords) {
                 let placed = false;
                 let attempts = 0;
                 
                 while (!placed && attempts < 100) {
                     attempts++;
-                    
-                    // Escolher direção aleatória
                     const directions = [
-                        { dr: 0, dc: 1 },   // Horizontal
-                        { dr: 1, dc: 0 },   // Vertical
-                        { dr: 1, dc: 1 },   // Diagonal direita
-                        { dr: 1, dc: -1 }   // Diagonal esquerda
+                        { dr: 0, dc: 1 }, { dr: 1, dc: 0 }, 
+                        { dr: 1, dc: 1 }, { dr: 1, dc: -1 }
                     ];
-                    
                     const direction = directions[Math.floor(Math.random() * directions.length)];
                     
-                    // Escolher posição inicial
                     const startRow = Math.floor(Math.random() * GRID_SIZE);
                     const startCol = Math.floor(Math.random() * GRID_SIZE);
-                    
-                    // Verificar se a palavra cabe
                     const endRow = startRow + direction.dr * (word.length - 1);
                     const endCol = startCol + direction.dc * (word.length - 1);
                     
@@ -448,7 +657,6 @@
                         continue;
                     }
                     
-                    // Verificar se não há conflito com outras palavras
                     let conflict = false;
                     for (let i = 0; i < word.length; i++) {
                         const row = startRow + i * direction.dr;
@@ -461,11 +669,8 @@
                         }
                     }
                     
-                    if (conflict) {
-                        continue;
-                    }
+                    if (conflict) continue;
                     
-                    // Colocar a palavra no grid
                     for (let i = 0; i < word.length; i++) {
                         const row = startRow + i * direction.dr;
                         const col = startCol + i * direction.dc;
@@ -477,7 +682,6 @@
                 }
             }
             
-            // Preencher células vazias com letras aleatórias
             const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
             cells.forEach(cell => {
                 if (!cell.textContent) {
@@ -486,7 +690,6 @@
             });
         }
 
-        // Atualizar a lista de palavras
         function updateWordList() {
             wordListElement.innerHTML = '';
             totalWordsElement.textContent = currentWords.length;
@@ -500,28 +703,22 @@
             });
         }
 
-        // Atualizar display do timer
-        function updateTimerDisplay() {
-            const minutes = Math.floor(timeLeft / 60);
-            const seconds = timeLeft % 60;
-            timeElement.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-        }
-
-        // Iniciar os temporizadores
         function startTimers() {
-            // Timer para mudança de palavras
             clearInterval(changeTimer);
-            timeLeft = WORD_CHANGE_INTERVAL / 1000; // em segundos
+            timeLeft = WORD_CHANGE_INTERVAL / 1000;
+            totalTime = timeLeft;
             updateTimerDisplay();
+            updateProgressBar();
             
             changeTimer = setInterval(() => {
                 if (!gameActive) return;
                 
                 timeLeft--;
                 updateTimerDisplay();
+                updateProgressBar();
                 
                 if (timeLeft <= 0) {
-                    // Tempo acabou - verificar se o jogador ganhou ou perdeu
+                    clearInterval(changeTimer);
                     if (foundWords.length === currentWords.length) {
                         showCongratulations();
                     } else {
@@ -531,7 +728,32 @@
             }, 1000);
         }
 
-        // Sistema de seleção de palavras
+        function updateTimerDisplay() {
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            timeElement.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            
+            if (timeLeft <= 30) {
+                timeElement.className = 'time-warning';
+            } else {
+                timeElement.className = '';
+            }
+        }
+
+        function updateProgressBar() {
+            const progress = ((totalTime - timeLeft) / totalTime) * 100;
+            progressBarElement.style.width = `${progress}%`;
+            
+            if (progress > 80) {
+                progressBarElement.style.backgroundColor = '#e74c3c';
+            } else if (progress > 60) {
+                progressBarElement.style.backgroundColor = '#f39c12';
+            } else {
+                progressBarElement.style.backgroundColor = '#27ae60';
+            }
+        }
+
+        // ========== SISTEMA DE SELEÇÃO ==========
         let isSelecting = false;
 
         function startSelection(e) {
@@ -543,36 +765,28 @@
 
         function continueSelection(e) {
             if (!isSelecting || !gameActive) return;
-            
-            const cell = e.target;
-            if (!selectedCells.includes(cell)) {
-                selectedCells.push(cell);
-                cell.classList.add('selected');
+            if (!selectedCells.includes(e.target)) {
+                selectedCells.push(e.target);
+                e.target.classList.add('selected');
             }
         }
 
-        function endSelection(e) {
+        function endSelection() {
             if (!isSelecting || !gameActive) return;
             isSelecting = false;
             
-            // Verificar se a seleção forma uma palavra
             checkSelection();
             
-            // Limpar seleção
             selectedCells.forEach(cell => {
                 cell.classList.remove('selected');
             });
             selectedCells = [];
         }
 
-        // Verificar se a seleção corresponde a uma palavra
         function checkSelection() {
             if (selectedCells.length < 3) return;
             
-            // Obter a palavra formada pela seleção
             const selectedWord = selectedCells.map(cell => cell.textContent).join('');
-            
-            // Verificar se a palavra está na lista (em qualquer direção)
             const reversedWord = selectedWord.split('').reverse().join('');
             
             let foundWord = null;
@@ -584,31 +798,28 @@
             }
             
             if (foundWord && !foundWords.includes(foundWord)) {
-                // Marcar palavra como encontrada
                 foundWords.push(foundWord);
                 
-                // Marcar células como encontradas
                 selectedCells.forEach(cell => {
                     cell.classList.add('found');
                 });
                 
-                // Atualizar lista de palavras
                 const wordElement = document.querySelector(`.word-item[data-word="${foundWord}"]`);
                 if (wordElement) {
                     wordElement.classList.add('found');
                 }
                 
-                // Atualizar contador
                 updateFoundCount();
                 
-                // Atualizar pontuação (para o primeiro aluno por enquanto)
-                if (students.length > 0) {
-                    students[0].score += foundWord.length * 10;
-                    students[0].wordsFound++;
+                // Atualizar pontuação
+                const student = students.find(s => s.name === currentPlayer);
+                if (student) {
+                    student.score += foundWord.length * 10;
+                    student.wordsFound++;
+                    student.timeLeft = timeLeft;
                     updateScoreboard();
                     saveStudents();
                     
-                    // Verificar se todas as palavras foram encontradas
                     if (foundWords.length === currentWords.length) {
                         showCongratulations();
                     }
@@ -616,71 +827,14 @@
             }
         }
 
-        // Mostrar mensagem de parabéns
-        function showCongratulations() {
-            gameActive = false;
-            clearInterval(changeTimer);
-            
-            // Atualizar estatísticas na mensagem
-            congratsFoundElement.textContent = foundWords.length;
-            congratsTotalElement.textContent = currentWords.length;
-            congratsScoreElement.textContent = students.length > 0 ? students[0].score : 0;
-            
-            congratulationsElement.style.display = 'block';
-            overlayElement.style.display = 'block';
-        }
-
-        // Mostrar mensagem de não foi dessa vez
-        function showGameOver() {
-            gameActive = false;
-            clearInterval(changeTimer);
-            
-            // Atualizar estatísticas na mensagem
-            gameoverFoundElement.textContent = foundWords.length;
-            gameoverTotalElement.textContent = currentWords.length;
-            gameoverScoreElement.textContent = students.length > 0 ? students[0].score : 0;
-            
-            gameOverElement.style.display = 'block';
-            overlayElement.style.display = 'block';
-        }
-
-        // Continuar jogo após parabéns
-        continueButton.addEventListener('click', () => {
-            congratulationsElement.style.display = 'none';
-            overlayElement.style.display = 'none';
-            gameActive = true;
-            selectNewWords();
-            startTimers();
-        });
-
-        // Tentar novamente após perder
-        tryAgainButton.addEventListener('click', () => {
-            gameOverElement.style.display = 'none';
-            overlayElement.style.display = 'none';
-            gameActive = true;
-            selectNewWords();
-            startTimers();
-        });
-
-        // Atualizar contador de palavras encontradas
         function updateFoundCount() {
             foundCountElement.textContent = foundWords.length;
         }
 
-        // Sistema de pontuação dos alunos
+        // ========== SISTEMA DE PONTUAÇÃO ==========
         function loadStudents() {
             const savedStudents = localStorage.getItem('religiousWordSearchStudents');
-            if (savedStudents) {
-                students = JSON.parse(savedStudents);
-            } else {
-                // Alunos padrão para demonstração
-                students = [
-                    { name: "Ana", score: 0, wordsFound: 0 },
-                    { name: "Bruno", score: 0, wordsFound: 0 },
-                    { name: "Carla", score: 0, wordsFound: 0 }
-                ];
-                saveStudents();
-            }
+            students = savedStudents ? JSON.parse(savedStudents) : [];
         }
 
         function saveStudents() {
@@ -690,8 +844,20 @@
         function updateScoreboard() {
             scoreBodyElement.innerHTML = '';
             
-            students.forEach(student => {
+            // Ordenar por pontuação (maior primeiro)
+            const sortedStudents = [...students].sort((a, b) => {
+                if (b.score !== a.score) return b.score - a.score;
+                return b.timeLeft - a.timeLeft;
+            });
+            
+            sortedStudents.forEach((student, index) => {
                 const row = document.createElement('tr');
+                if (student.name === currentPlayer) {
+                    row.classList.add('current-player');
+                }
+                
+                const positionCell = document.createElement('td');
+                positionCell.textContent = getMedal(index + 1);
                 
                 const nameCell = document.createElement('td');
                 nameCell.textContent = student.name;
@@ -702,52 +868,136 @@
                 const wordsCell = document.createElement('td');
                 wordsCell.textContent = student.wordsFound;
                 
+                const timeCell = document.createElement('td');
+                timeCell.textContent = formatTime(student.timeLeft);
+                
+                row.appendChild(positionCell);
                 row.appendChild(nameCell);
                 row.appendChild(scoreCell);
                 row.appendChild(wordsCell);
+                row.appendChild(timeCell);
                 
                 scoreBodyElement.appendChild(row);
             });
         }
 
-        // Adicionar novo aluno
-        addStudentButton.addEventListener('click', () => {
-            const name = prompt("Digite o nome do aluno:");
-            if (name) {
-                students.push({
-                    name: name,
-                    score: 0,
-                    wordsFound: 0
-                });
+        function getMedal(position) {
+            if (position === 1) return '🥇';
+            if (position === 2) return '🥈';
+            if (position === 3) return '🥉';
+            return position;
+        }
+
+        function getPlayerPosition() {
+            const sortedStudents = [...students].sort((a, b) => {
+                if (b.score !== a.score) return b.score - a.score;
+                return b.timeLeft - a.timeLeft;
+            });
+            
+            for (let i = 0; i < sortedStudents.length; i++) {
+                if (sortedStudents[i].name === currentPlayer) {
+                    return i + 1;
+                }
+            }
+            return students.length;
+        }
+
+        function resetCurrentPlayerStats() {
+            const student = students.find(s => s.name === currentPlayer);
+            if (student) {
+                student.score = 0;
+                student.wordsFound = 0;
+                student.timeLeft = 0;
                 updateScoreboard();
                 saveStudents();
             }
-        });
+        }
 
-        // Reiniciar o jogo
-        resetGameButton.addEventListener('click', () => {
-            if (confirm("Tem certeza que deseja reiniciar o jogo? Todas as pontuações serão zeradas.")) {
-                students.forEach(student => {
-                    student.score = 0;
-                    student.wordsFound = 0;
-                });
+        // ========== FUNÇÕES DE CONTROLE ==========
+        function setCustomTime() {
+            const minutes = parseInt(timeInput.value);
+            if (minutes >= 1 && minutes <= 3) {
+                WORD_CHANGE_INTERVAL = minutes * 60 * 1000;
+                timeLeft = WORD_CHANGE_INTERVAL / 1000;
+                totalTime = timeLeft;
+                updateTimerDisplay();
+                updateProgressBar();
+                alert(`Tempo definido para ${minutes} minutos`);
+            } else {
+                alert('Por favor, digite um valor entre 1 e 3 minutos');
+            }
+        }
+
+        function resetGame() {
+            if (confirm('Reiniciar o jogo? Sua pontuação atual será perdida.')) {
+                resetCurrentPlayerStats();
                 selectNewWords();
-                updateScoreboard();
-                saveStudents();
-                gameActive = true;
-                
-                // Esconder mensagens se estiverem visíveis
-                congratulationsElement.style.display = 'none';
-                gameOverElement.style.display = 'none';
-                overlayElement.style.display = 'none';
-                
-                // Reiniciar timer
                 startTimers();
+                gameActive = true;
             }
-        });
+        }
 
-        // Inicializar o jogo quando a página carregar
-        window.addEventListener('load', initGame);
+        function continueGame() {
+            congratulationsElement.style.display = 'none';
+            overlayElement.style.display = 'none';
+            selectNewWords();
+            startTimers();
+            gameActive = true;
+        }
+
+        function tryAgain() {
+            gameOverElement.style.display = 'none';
+            overlayElement.style.display = 'none';
+            selectNewWords();
+            startTimers();
+            gameActive = true;
+        }
+
+        // ========== MENSAGENS ==========
+        function showCongratulations() {
+            gameActive = false;
+            clearInterval(changeTimer);
+            
+            const student = students.find(s => s.name === currentPlayer);
+            if (student) {
+                congratsPlayerElement.textContent = currentPlayer;
+                congratsFoundElement.textContent = foundWords.length;
+                congratsTotalElement.textContent = currentWords.length;
+                congratsScoreElement.textContent = student.score;
+                congratsTimeElement.textContent = formatTime(timeLeft);
+                playerPositionElement.textContent = getPlayerPosition();
+            }
+            
+            congratulationsElement.style.display = 'block';
+            overlayElement.style.display = 'block';
+        }
+
+        function showGameOver() {
+            gameActive = false;
+            clearInterval(changeTimer);
+            
+            const student = students.find(s => s.name === currentPlayer);
+            if (student) {
+                gameoverPlayerElement.textContent = currentPlayer;
+                gameoverFoundElement.textContent = foundWords.length;
+                gameoverTotalElement.textContent = currentWords.length;
+                gameoverScoreElement.textContent = student.score;
+            }
+            
+            gameOverElement.style.display = 'block';
+            overlayElement.style.display = 'block';
+        }
+
+        // ========== UTILITÁRIOS ==========
+        function formatTime(seconds) {
+            if (!seconds) return '00:00';
+            const minutes = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            return `${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        // ========== INICIALIZAR O JOGO ==========
+        window.addEventListener('load', initializeGame);
     </script>
 </body>
 </html>
