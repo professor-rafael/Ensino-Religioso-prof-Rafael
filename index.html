@@ -244,30 +244,6 @@
             border: 1px solid #ddd;
         }
         
-        .time-config {
-            margin-bottom: 15px;
-            padding: 12px;
-            background-color: #f0f7ff;
-            border-radius: 8px;
-            text-align: center;
-            border: 2px dashed #4a90e2;
-        }
-        
-        .time-config label {
-            margin-right: 10px;
-            font-weight: bold;
-            color: #2c3e50;
-        }
-        
-        .time-config input {
-            width: 50px;
-            padding: 8px;
-            border: 2px solid #4a90e2;
-            border-radius: 5px;
-            text-align: center;
-            font-weight: bold;
-        }
-        
         .category-info {
             text-align: center;
             margin-bottom: 10px;
@@ -368,12 +344,6 @@
     <!-- Container do jogo (INICIALMENTE ESCONDIDO) -->
     <div class="container" id="game-container">
         <h1>Caça-Palavras - Ensino Religioso</h1>
-        
-        <div class="time-config">
-            <label for="time-input">Tempo (1-3 minutos):</label>
-            <input type="number" id="time-input" min="1" max="3" value="3">
-            <button id="set-time">Definir Tempo</button>
-        </div>
         
         <div class="game-info">
             <div class="timer">Tempo: <span id="time">03:00</span></div>
@@ -485,8 +455,6 @@
         const overlayElement = document.getElementById('overlay');
         const continueButton = document.getElementById('continue-button');
         const tryAgainButton = document.getElementById('try-again-button');
-        const timeInput = document.getElementById('time-input');
-        const setTimeButton = document.getElementById('set-time');
         const categoryInfoElement = document.getElementById('category-info');
         const progressBarElement = document.getElementById('progress-bar');
         const congratsPlayerElement = document.getElementById('congrats-player');
@@ -528,7 +496,6 @@
             resetGameButton.addEventListener('click', resetGame);
             continueButton.addEventListener('click', continueGame);
             tryAgainButton.addEventListener('click', tryAgain);
-            setTimeButton.addEventListener('click', setCustomTime);
             
             // Permitir Enter no campo de nome
             playerNameInput.addEventListener('keypress', function(e) {
@@ -914,20 +881,6 @@
         }
 
         // ========== FUNÇÕES DE CONTROLE ==========
-        function setCustomTime() {
-            const minutes = parseInt(timeInput.value);
-            if (minutes >= 1 && minutes <= 3) {
-                WORD_CHANGE_INTERVAL = minutes * 60 * 1000;
-                timeLeft = WORD_CHANGE_INTERVAL / 1000;
-                totalTime = timeLeft;
-                updateTimerDisplay();
-                updateProgressBar();
-                alert(`Tempo definido para ${minutes} minutos`);
-            } else {
-                alert('Por favor, digite um valor entre 1 e 3 minutos');
-            }
-        }
-
         function resetGame() {
             if (confirm('Reiniciar o jogo? Sua pontuação atual será perdida.')) {
                 resetCurrentPlayerStats();
