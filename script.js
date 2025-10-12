@@ -56,7 +56,7 @@ const wordCategories = {
                "CARIDADE", "PERDAO", "HUMILDADE", "SANTIDADE", "JUSTICA", "AMOR", "PAZ"],
     eventos: ["CRIACAO", "DILUVIO", "EXODO", "CONQUISTA", "EXILIO", "ENCARNACAO", 
              "NATIVIDADE", "BATISMO", "TRANSFIGURACAO", "PASCOA", "PENTECOSTES", 
-             "ASCENSAO", "RESSURRICAO", "PAROUSIA"]
+             "ASCENSAO", "RESSURREICAO", "PAROUSIA"]
 };
 
 // ========== INICIALIZAÇÃO DO JOGO ==========
@@ -526,4 +526,5 @@ function formatTime(seconds) {
 }
 
 // ========== INICIALIZAR O JOGO ==========
+
 window.addEventListener('load', initializeGame);
