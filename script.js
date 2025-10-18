@@ -1,6 +1,6 @@
 // ========== CONFIGURAÇÕES E VARIÁVEIS GLOBAIS ==========
 const GRID_SIZE = 15;
-let WORD_CHANGE_INTERVAL = 2 * 60 * 1000; // 2 minutos
+let WORD_CHANGE_INTERVAL = 1 * 60 * 1000; // 1 minutos
 let currentWords = [];
 let selectedCells = [];
 let foundWords = [];
@@ -528,3 +528,4 @@ function formatTime(seconds) {
 // ========== INICIALIZAR O JOGO ==========
 
 window.addEventListener('load', initializeGame);
+
