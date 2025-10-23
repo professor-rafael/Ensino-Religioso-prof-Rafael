@@ -46,7 +46,8 @@ const gameoverScoreElement = document.getElementById('gameover-score');
 
 // ========== LISTA DE PALAVRAS ==========
 const wordCategories = {
-    personagens: ["ABRAO", "MOISES", "DAVI", "SALOMAO", "RAFAEL", "ISAIAS", "JEREMIAS", 
+    personagens: ["ABRAO", "MOISES", "DAVI", "SALOMAO", "PRISCILA", "LIDIA", "RUTE", "EMANUEL",
+                  "RAFAEL", "ESTEVAO", "ISAIAS", "JEREMIAS", 
                  "DANIEL", "JONAS", "MARIA", "JOSE", "PEDRO", "PAULO", "JOAO"],
     livros: ["GENESIS", "EXODO", "LEVITICO", "NUMEROS", "DEUTERONOMIO", "JOSUE", 
             "SALMOS", "PROVERBIOS", "ECLESIASTES", "CANTARES", "ISAIAS", "MATEUS", 
@@ -528,4 +529,5 @@ function formatTime(seconds) {
 // ========== INICIALIZAR O JOGO ==========
 
 window.addEventListener('load', initializeGame);
+
 
