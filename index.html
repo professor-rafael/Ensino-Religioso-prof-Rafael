@@ -1,102 +1,295 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Caça-Palavras - Ensino Religioso</title>
-    <link rel="icon" href="icon.png">
-    <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Caça-Palavras - Ensino Religioso (Dark)</title>
+<style>
+/* ==== ESTILO DARK ==== */
+*{box-sizing:border-box;margin:0;padding:0;font-family:"Poppins",sans-serif}
+body{background:linear-gradient(135deg,#0f0f1a,#1a1a2e);color:#eee;min-height:100vh;display:flex;justify-content:center;align-items:center}
+h1,h2,h3,p,span{color:#f0f0f0}
+
+/* Tela inicial */
+.player-setup{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);
+background:linear-gradient(145deg,#141429,#0d0d1a);border:2px solid rgba(102,126,234,0.4);
+box-shadow:0 0 25px rgba(102,126,234,0.6);padding:50px 40px;border-radius:20px;text-align:center;z-index:1001;max-width:450px;width:90%}
+.player-setup h2{font-size:1.8em;margin-bottom:10px;color:#9fafff}
+.player-setup p{color:#ccc;margin-bottom:20px}
+.player-setup input{width:80%;padding:14px;border:none;border-radius:8px;background:rgba(255,255,255,0.1);color:white;font-size:1em;text-align:center;outline:none}
+.player-setup button{margin-top:25px;padding:14px 35px;background:linear-gradient(135deg,#667eea,#764ba2);color:white;border:none;border-radius:12px;cursor:pointer;font-weight:600;font-size:1.1em;box-shadow:0 0 15px rgba(118,75,162,0.5)}
+.player-setup button:hover{transform:scale(1.05)}
+
+/* Jogo */
+#game-container{display:none;background:#1b1b2f;padding:30px;border-radius:20px;width:95%;max-width:1100px;box-shadow:0 0 30px rgba(0,0,0,0.4)}
+h1{text-align:center;color:#9fafff;margin-bottom:15px}
+.game-info{display:flex;justify-content:space-around;background:rgba(255,255,255,0.05);padding:10px;border-radius:10px;margin-bottom:15px}
+.grid{display:grid;grid-template-columns:repeat(15,1fr);gap:3px;margin-bottom:25px;padding:20px;background:#222;border-radius:15px;box-shadow:0 8px 25px rgba(0,0,0,0.3)}
+.cell{width:35px;height:35px;display:flex;align-items:center;justify-content:center;font-weight:600;background:#2d2d44;cursor:pointer;border-radius:8px;color:#ddd;user-select:none}
+.cell:hover{background:#3b3b58}
+.cell.selected{background:linear-gradient(135deg,#3498db,#2980b9);color:white}
+.cell.found{background:linear-gradient(135deg,#27ae60,#2ecc71);color:white}
+.word-item{padding:6px 12px;display:inline-block;margin:4px;background:rgba(255,255,255,0.05);border-radius:8px}
+.word-item.found{background:linear-gradient(135deg,#27ae60,#2ecc71);color:white}
+.scoreboard{margin-top:25px;background:#262640;padding:25px;border-radius:15px}
+.scoreboard h2{text-align:center;margin-bottom:20px;color:#9fafff}
+table{width:100%;border-collapse:collapse}
+th,td{padding:10px;border-bottom:1px solid rgba(255,255,255,0.1);text-align:center}
+th{background:linear-gradient(135deg,#667eea,#764ba2);color:white}
+tr.current-player{background:rgba(102,126,234,0.2)}
+.controls{display:flex;justify-content:center;gap:20px;margin-top:25px}
+button{padding:14px 28px;background:linear-gradient(135deg,#667eea,#764ba2);color:white;border:none;border-radius:12px;cursor:pointer;font-weight:600;transition:0.3s}
+button:hover{transform:translateY(-3px);box-shadow:0 0 15px rgba(102,126,234,0.5)}
+.instructions{margin-top:25px;padding:20px;background:rgba(255,255,255,0.05);border-radius:15px;text-align:center}
+.overlay,.congratulations,.game-over{display:none}
+.overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);z-index:999}
+.congratulations,.game-over{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);
+background:#1e1e32;padding:40px;border-radius:20px;text-align:center;z-index:1000;box-shadow:0 0 30px rgba(102,126,234,0.6)}
+</style>
 </head>
+
 <body>
-    <!-- Tela de configuração do jogador (SEMPRE VISÍVEL NO INÍCIO) -->
-    <div class="player-setup" id="player-setup">
-        <h2>Bem-vindo ao Caça-Palavras!</h2>
-        <p>Digite seu nome para começar:</p>
-        <input type="text" id="player-name" placeholder="Seu nome" maxlength="20">
-        <button id="start-game">Começar Jogo</button>
+<!-- Tela inicial -->
+<div class="player-setup" id="player-setup">
+    <h2>🎮 Bem-vindo ao Caça-Palavras!</h2>
+    <p>Digite seu nome para começar:</p>
+    <input type="text" id="player-name" placeholder="Seu nome" maxlength="20">
+    <button id="start-game">Começar Jogo</button>
+</div>
+
+<!-- Container principal -->
+<div class="container" id="game-container">
+    <h1>Caça-Palavras - Ensino Religioso</h1>
+    <div class="game-info">
+        <div>⏱ Tempo: <span id="time">01:00</span></div>
+        <div>📜 Palavras: <span id="found-count">0</span>/<span id="total-words">0</span></div>
+        <div>👤 Jogador: <span id="current-player">-</span></div>
+    </div>
+    <div class="category-info" id="category-info"></div>
+    <div class="word-list" id="word-list"></div>
+    <div class="grid" id="grid"></div>
+
+    <div class="scoreboard">
+        <h2>🏆 Classificação</h2>
+        <table>
+            <thead><tr><th>Posição</th><th>Aluno</th><th>Pontuação</th><th>Palavras</th><th>Tempo</th></tr></thead>
+            <tbody id="score-body"></tbody>
+        </table>
     </div>
 
-    <!-- Container do jogo (INICIALMENTE ESCONDIDO) -->
-    <div class="container" id="game-container">
-        <h1>Caça-Palavras - Ensino Religioso</h1>
-        
-        <div class="game-info">
-            <div class="timer">Tempo: <span id="time">02:00</span></div>
-            <div>Palavras: <span id="found-count">0</span>/<span id="total-words">0</span></div>
-            <div>Jogador: <span id="current-player">-</span></div>
-        </div>
-        
-        <div class="progress-bar">
-            <div class="progress" id="progress-bar"></div>
-        </div>
-        
-        <div class="category-info" id="category-info">
-            <!-- Categoria será inserida aqui -->
-        </div>
-        
-        <div class="word-list" id="word-list">
-            <!-- Palavras serão inseridas aqui -->
-        </div>
-        
-        <div class="grid" id="grid">
-            <!-- Grid será gerado aqui -->
-        </div>
-        
-        <div class="scoreboard">
-            <h2>Classificação</h2>
-            <table id="score-table">
-                <thead>
-                    <tr>
-                        <th>Posição</th>
-                        <th>Aluno</th>
-                        <th>Pontuação</th>
-                        <th>Palavras</th>
-                        <th>Tempo Restante</th>
-                    </tr>
-                </thead>
-                <tbody id="score-body">
-                    <!-- Pontuações serão inseridas aqui -->
-                </tbody>
-            </table>
-        </div>
-        
-        <div class="controls">
-            <button id="new-player">Novo Jogador</button>
-            <button id="reset-game">Reiniciar Jogo</button>
-        </div>
-        
-        <div class="instructions">
-            <p><strong>Instruções:</strong> Clique e arraste para selecionar palavras no grid. Você tem até 1 minuto!</p>
-        </div>
+    <div class="controls">
+        <button id="new-player">Novo Jogador</button>
+        <button id="reset-game">Reiniciar Jogo</button>
     </div>
-    
-    <div class="overlay" id="overlay"></div>
-    
-    <!-- Mensagem de Parabéns -->
-    <div class="congratulations" id="congratulations">
-        <h2>Parabéns, <span id="congrats-player"></span>!</h2>
-        <p> Venceu o professor Rafael🤯!</p>
-        <p>Posição: <span id="player-position"></span>º</p>
-        <div class="stats">
-            <p>Palavras: <span id="congrats-found">0</span>/<span id="congrats-total">0</span></p>
-            <p>Pontuação: <span id="congrats-score">0</span></p>
-            <p>Tempo: <span id="congrats-time">0</span></p>
-        </div>
-        <button id="continue-button">Jogar Novamente</button>
+    <div class="instructions">
+        <strong>Instruções:</strong> Clique e arraste para selecionar palavras (em qualquer direção). Você tem 1 minuto!
     </div>
-    
-    <!-- Mensagem de Fim de Jogo -->
-    <div class="game-over" id="game-over">
-        <h2>Tempo esgotado, <span id="gameover-player"></span>!</h2>
-        <p>Perdeu para o professor Rafael 😉.</p>
-        <div class="stats">
-            <p>Palavras: <span id="gameover-found">0</span>/<span id="gameover-total">0</span></p>
-            <p>Pontuação: <span id="gameover-score">0</span></p>
-        </div>
-        <button id="try-again-button">Tentar Novamente</button>
-    </div>
+</div>
 
-    <script src="script.js"></script>
+<div class="overlay" id="overlay"></div>
+<div class="congratulations" id="congratulations">
+    <h2>🎉 Parabéns, <span id="congrats-player"></span>!</h2>
+    <p>Você venceu o professor Rafael 🤯!</p>
+    <p>Posição: <span id="player-position"></span>º</p>
+    <div class="stats">
+        <p>Palavras: <span id="congrats-found"></span>/<span id="congrats-total"></span></p>
+        <p>Pontuação: <span id="congrats-score"></span></p>
+        <p>Tempo: <span id="congrats-time"></span></p>
+    </div>
+    <button id="continue-button">Jogar Novamente</button>
+</div>
+
+<div class="game-over" id="game-over">
+    <h2>⏰ Tempo esgotado, <span id="gameover-player"></span>!</h2>
+    <p>Você perdeu para o professor Rafael 😉.</p>
+    <div class="stats">
+        <p>Palavras: <span id="gameover-found"></span>/<span id="gameover-total"></span></p>
+        <p>Pontuação: <span id="gameover-score"></span></p>
+    </div>
+    <button id="try-again-button">Tentar Novamente</button>
+</div>
+
+<script>
+/* === VARIÁVEIS GERAIS === */
+const GRID_SIZE = 15;
+let currentWords=[],foundWords=[],selectedCells=[];
+let currentPlayer=null,students=[],gameActive=false;
+let timeLeft=60,totalTime=60,changeTimer,currentCategory="";
+const gridElement=document.getElementById("grid");
+const playerSetupElement=document.getElementById("player-setup");
+const gameContainerElement=document.getElementById("game-container");
+const playerNameInput=document.getElementById("player-name");
+const startGameButton=document.getElementById("start-game");
+const timeElement=document.getElementById("time");
+const foundCountElement=document.getElementById("found-count");
+const totalWordsElement=document.getElementById("total-words");
+const currentPlayerElement=document.getElementById("current-player");
+const categoryInfoElement=document.getElementById("category-info");
+const wordListElement=document.getElementById("word-list");
+const scoreBodyElement=document.getElementById("score-body");
+const overlay=document.getElementById("overlay");
+const congratulations=document.getElementById("congratulations");
+const gameOver=document.getElementById("game-over");
+const congratsPlayer=document.getElementById("congrats-player");
+const playerPosition=document.getElementById("player-position");
+const congratsFound=document.getElementById("congrats-found");
+const congratsTotal=document.getElementById("congrats-total");
+const congratsScore=document.getElementById("congrats-score");
+const congratsTime=document.getElementById("congrats-time");
+const gameoverPlayer=document.getElementById("gameover-player");
+const gameoverFound=document.getElementById("gameover-found");
+const gameoverTotal=document.getElementById("gameover-total");
+const gameoverScore=document.getElementById("gameover-score");
+
+const categories={
+personagens:["ABRAO","MOISES","DAVI","SALOMAO","RAFAEL","ISAIAS","DANIEL","JONAS","MARIA","JOSE","PEDRO","PAULO","JOAO"],
+livros:["GENESIS","EXODO","LEVITICO","NUMEROS","DEUTERONOMIO","SALMOS","PROVERBIOS","MATEUS","MARCOS","LUCAS","JOAO","ROMANOS","EFESIOS"],
+conceitos:["GRACA","MISERICORDIA","REDENCAO","SALVACAO","ORACAO","JEJUM","PERDAO","SANTIDADE","JUSTICA","AMOR","PAZ"],
+eventos:["CRIACAO","DILUVIO","EXODO","NATIVIDADE","BATISMO","PASCOA","RESSURREICAO"]
+};
+
+/* === FUNÇÕES === */
+function initialize(){
+ startGameButton.onclick=startGame;
+ document.getElementById("new-player").onclick=()=>{showSetup();};
+ document.getElementById("reset-game").onclick=resetGame;
+ document.getElementById("continue-button").onclick=()=>{overlay.style.display="none";congratulations.style.display="none";resetGame();};
+ document.getElementById("try-again-button").onclick=()=>{overlay.style.display="none";gameOver.style.display="none";resetGame();};
+ createGrid(); loadStudents();
+}
+
+function createGrid(){
+ gridElement.innerHTML="";
+ for(let i=0;i<GRID_SIZE;i++)for(let j=0;j<GRID_SIZE;j++){
+   const c=document.createElement("div");
+   c.className="cell";c.dataset.row=i;c.dataset.col=j;
+   gridElement.appendChild(c);
+ }
+ gridElement.onmousedown=startSelection;
+ gridElement.onmouseover=extendSelection;
+ document.onmouseup=endSelection;
+}
+
+function startGame(){
+ const name=playerNameInput.value.trim();
+ if(!name)return alert("Digite seu nome!");
+ currentPlayer=name;currentPlayerElement.textContent=name;
+ playerSetupElement.style.display="none";
+ gameContainerElement.style.display="block";
+ resetGame();
+}
+
+function showSetup(){
+ clearInterval(changeTimer);
+ playerSetupElement.style.display="block";
+ gameContainerElement.style.display="none";
+ playerNameInput.value="";playerNameInput.focus();
+}
+
+function selectNewWords(){
+ const keys=Object.keys(categories);
+ currentCategory=keys[Math.floor(Math.random()*keys.length)];
+ currentWords=[...categories[currentCategory]].sort(()=>Math.random()-0.5).slice(0,10);
+ categoryInfoElement.textContent="Categoria: "+currentCategory.toUpperCase();
+ totalWordsElement.textContent=currentWords.length;
+ wordListElement.innerHTML=currentWords.map(w=>`<div class='word-item'>${w}</div>`).join("");
+ generateWordSearch();
+}
+
+function generateWordSearch(){
+ const grid=Array.from({length:GRID_SIZE},()=>Array(GRID_SIZE).fill(""));
+ const dirs=[[0,1],[1,0],[0,-1],[-1,0],[1,1],[1,-1],[-1,1],[-1,-1]];
+ for(const word of currentWords){
+   for(let t=0;t<100;t++){
+     const drc=dirs[Math.floor(Math.random()*dirs.length)];
+     const [dr,dc]=drc;
+     const r=Math.floor(Math.random()*GRID_SIZE);
+     const c=Math.floor(Math.random()*GRID_SIZE);
+     if(canPlace(grid,word,r,c,dr,dc)){
+       for(let i=0;i<word.length;i++)grid[r+i*dr][c+i*dc]=word[i];
+       break;
+     }
+   }
+ }
+ const letters="ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+ for(let i=0;i<GRID_SIZE;i++)for(let j=0;j<GRID_SIZE;j++)
+   if(!grid[i][j])grid[i][j]=letters[Math.floor(Math.random()*letters.length)];
+ const cells=gridElement.querySelectorAll(".cell");
+ for(let i=0;i<GRID_SIZE;i++)for(let j=0;j<GRID_SIZE;j++)
+   cells[i*GRID_SIZE+j].textContent=grid[i][j];
+}
+function canPlace(grid,word,r,c,dr,dc){
+ for(let i=0;i<word.length;i++){
+   const nr=r+i*dr,nc=c+i*dc;
+   if(nr<0||nc<0||nr>=GRID_SIZE||nc>=GRID_SIZE)return false;
+   if(grid[nr][nc] && grid[nr][nc]!==word[i])return false;
+ }
+ return true;
+}
+
+/* Seleção */
+function startSelection(e){if(!gameActive)return;selectedCells=[e.target];e.target.classList.add("selected");}
+function extendSelection(e){if(!gameActive||!selectedCells.length||!e.buttons)return;
+ const cell=e.target;if(!cell.classList.contains("cell")||selectedCells.includes(cell))return;
+ selectedCells.push(cell);cell.classList.add("selected");}
+function endSelection(){
+ if(!selectedCells.length)return;
+ const letters=selectedCells.map(c=>c.textContent).join("");
+ const reverse=letters.split("").reverse().join("");
+ if(currentWords.includes(letters)&&!foundWords.includes(letters))markFound(letters);
+ else if(currentWords.includes(reverse)&&!foundWords.includes(reverse))markFound(reverse);
+ else selectedCells.forEach(c=>c.classList.remove("selected"));
+ selectedCells=[];
+}
+
+function markFound(w){
+ foundWords.push(w);
+ selectedCells.forEach(c=>{c.classList.remove("selected");c.classList.add("found");});
+ document.querySelectorAll(".word-item").forEach(x=>{if(x.textContent===w)x.classList.add("found");});
+ updateFound();
+ if(foundWords.length===currentWords.length)endGame(true);
+}
+function updateFound(){foundCountElement.textContent=foundWords.length;}
+
+/* Timer e fim de jogo */
+function startTimer(){
+ timeLeft=totalTime;updateTime();
+ clearInterval(changeTimer);
+ changeTimer=setInterval(()=>{if(timeLeft>0){timeLeft--;updateTime();}else endGame(false);},1000);
+}
+function updateTime(){
+ const m=Math.floor(timeLeft/60),s=timeLeft%60;
+ timeElement.textContent=`${m.toString().padStart(2,"0")}:${s.toString().padStart(2,"0")}`;
+}
+
+function endGame(v){
+ gameActive=false;clearInterval(changeTimer);
+ overlay.style.display="block";
+ if(v){
+   congratulations.style.display="block";
+   congratsPlayer.textContent=currentPlayer;
+   congratsFound.textContent=foundWords.length;
+   congratsTotal.textContent=currentWords.length;
+   congratsScore.textContent=foundWords.length*100+timeLeft*10;
+   congratsTime.textContent=`${totalTime-timeLeft}s`;
+ }else{
+   gameOver.style.display="block";
+   gameoverPlayer.textContent=currentPlayer;
+   gameoverFound.textContent=foundWords.length;
+   gameoverTotal.textContent=currentWords.length;
+   gameoverScore.textContent=foundWords.length*100;
+ }
+}
+
+function resetGame(){
+ foundWords=[];document.querySelectorAll(".cell").forEach(c=>c.classList.remove("found","selected"));
+ document.querySelectorAll(".word-item").forEach(w=>w.classList.remove("found"));
+ selectNewWords();updateFound();gameActive=true;startTimer();
+}
+
+/* Armazenamento */
+function loadStudents(){const s=localStorage.getItem("students");if(s)students=JSON.parse(s);}
+initialize();
+</script>
 </body>
-
 </html>
