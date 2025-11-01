@@ -82,7 +82,8 @@ background:#1e1e32;padding:40px;border-radius:20px;text-align:center;z-index:100
         <button id="reset-game">Reiniciar Jogo</button>
     </div>
     <div class="instructions">
-        <strong>Instruções:</strong> Clique e arraste para selecionar palavras (em qualquer direção). Você tem 1 minuto. O PROFESSOR RAFAEL, ESTÁ TORCENDO PRA VOCÊ NÃO CONSEGUIR REALIZAR ESTE CAÇA PALAVRA!
+        <strong>Instruções:</strong> Clique e arraste para selecionar palavras (em qualquer direção). Você tem 1 minuto. 
+        O PROFESSOR RAFAEL, ESTÁ TORCENDO PRA VOCÊ NÃO CONSEGUIR REALIZAR ESTE CAÇA PALAVRA!
     </div>
 </div>
 
@@ -290,6 +291,22 @@ function resetGame(){
 /* Armazenamento */
 function loadStudents(){const s=localStorage.getItem("students");if(s)students=JSON.parse(s);}
 initialize();
+		document.addEventListener('contextmenu', event => event.preventDefault()); // Desabilita o clique direito									
+											
+		document.addEventListener('keydown', function(event) {									
+		// F12 (123)									
+		if (event.keyCode === 123) {									
+		event.preventDefault();									
+		}									
+		// Ctrl+Shift+I (Inspecionar) ou Ctrl+Shift+J (Console)									
+		if (event.ctrlKey && event.shiftKey && (event.keyCode === 73 || event.keyCode === 74)) {									
+		event.preventDefault();									
+		}									
+		// Ctrl+U (Ver código-fonte)									
+		if (event.ctrlKey && event.keyCode === 85) {									
+		event.preventDefault();									
+		}									
+		});									
 </script>
 </body>
 </html>
